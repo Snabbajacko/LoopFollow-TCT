@@ -54,26 +54,11 @@ jobs:
             echo "has_permission=false" >> $GITHUB_OUTPUT # Set WORKFLOW_PERMISSION to false.
           fi
 
-      - name: Check for alive branches
-        if: steps.workflow-permission.outputs.has_permission == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          if [[ $(gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository_owner }}/LoopFollow/branches | jq --raw-output '[.[] | select(.name == "alive-main" or .name == "alive-dev")] | length > 0') == "true" ]]; then
-            echo "Branches 'alive-main' or 'alive-dev' exist."
-            echo "ALIVE_BRANCH_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "Branches 'alive-main' and 'alive-dev' do not exist."
-            echo "ALIVE_BRANCH_EXISTS=false" >> $GITHUB_ENV
-          fi
+                - name: Skip check and creation of alive branches
+        run: echo "Skipping alive branch logic – not needed for standalone build"
 
-      - name: Create alive branches
-        if: env.ALIVE_BRANCH_EXISTS == 'false'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          # Get ref for UPSTREAM_REPO:main
-          SHA_MAIN=$(curl -sS -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/git/refs/heads/main | jq -r '.object.sha')
+
+      com/repos/${{ env.UPSTREAM_REPO }}/git/refs/heads/main | jq -r '.object.sha')
 
           # Get ref for UPSTREAM_REPO:dev
           SHA_DEV=$(curl -sS -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/git/refs/heads/dev | jq -r '.object.sha')
